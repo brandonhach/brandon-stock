@@ -16,13 +16,21 @@ services:
             context: ./server
         ports:
             - '8000:8000'
+            - '5555:5555'
         environment:
             NODE_ENV: development
             DATABASE_URL: postgresql://postgres:abc@postgres:5432/brandon_stock_db
         volumes:
             - ./server:/server
             - /server/node_modules
-        command: npm run dev
+        command:
+            - /bin/sh
+            - -c
+            - |
+                echo "Starting the server..."
+                npx prisma generate
+                npx prisma db push
+                npm run dev
         depends_on:
             - postgres
 
