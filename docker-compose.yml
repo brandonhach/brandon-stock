@@ -1,0 +1,42 @@
+services:
+    client:
+        build:
+            context: ./client
+        ports:
+            - '3000:3000'
+        environment:
+            NODE_ENV: development
+        volumes:
+            - ./client:/client
+            - /client/node_modules
+        command: npm run dev
+
+    server:
+        build:
+            context: ./server
+        ports:
+            - '8000:8000'
+        environment:
+            NODE_ENV: development
+            DATABASE_URL: postgresql://postgres:abc@postgres:5432/brandon_stock_db
+        volumes:
+            - ./server:/server
+            - /server/node_modules
+        command: npm run dev
+        depends_on:
+            - postgres
+
+    postgres:
+        image: postgres:15-alpine
+        ports:
+            - '5432:5432'
+        environment:
+            - POSTGRES_DB=brandon_stock_db
+            - POSTGRES_USER=postgres
+            - POSTGRES_PASSWORD=abc
+            - POSTGRES_HOST_AUTH_METHOD=trust
+        volumes:
+            - postgres_data:/var/lib/postgresql/data
+
+volumes:
+    postgres_data:
