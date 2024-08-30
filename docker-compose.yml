@@ -9,7 +9,19 @@ services:
         volumes:
             - ./client:/client
             - ./client/node_modules:/client/node_modules
-            - ./client/.next:/client/.next
+        develop:
+            watch:
+                - action: sync
+                  path: ./src
+                  target: /client/src
+                  ignore:
+                      - node_modules/
+                - action: sync
+                  path: ./
+                  target: /client
+                  ignore:
+                      - node_modules/
+                      - package.json
     server:
         build:
             context: ./server
@@ -30,6 +42,19 @@ services:
                 npx prisma generate
                 npx prisma db push
                 npm run dev
+        develop:
+            watch:
+                - action: sync
+                  path: ./src
+                  target: /server/src
+                  ignore:
+                      - node_modules/
+                - action: sync
+                  path: ./
+                  target: /server
+                  ignore:
+                      - node_modules/
+                      - package.json
         depends_on:
             - postgres
 
