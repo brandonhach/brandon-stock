@@ -1,38 +1,46 @@
 services:
-    client:
+    frontend:
         build:
             context: ./client
         ports:
             - '3000:3000'
         environment:
-            NODE_ENV: development
+            NEXT_PUBLIC_API_BASE_URL: https://localhost:8000
         volumes:
-            - ./client:/client
+            - ./client/package.json:/client/package.json
             - ./client/node_modules:/client/node_modules
+        command:
+            - /bin/sh
+            - -c
+            - |
+                echo "Starting client..."
+                npx prisma generate
+                npm run dev
         develop:
             watch:
                 - action: sync
-                  path: ./src
+                  path: ./client/src/
                   target: /client/src
-                  ignore:
-                      - node_modules/
                 - action: sync
-                  path: ./
-                  target: /client
-                  ignore:
-                      - node_modules/
-                      - package.json
-    server:
+                  path: ./client/public/
+                  target: /client/public
+                - action: sync
+                  path: ./client/styles/
+                  target: /client/styles
+                - action: sync
+                  path: ./client/package.json
+                  target: /client/package.json
+    backend:
         build:
             context: ./server
         ports:
             - '8000:8000'
             - '5555:5555'
         environment:
-            NODE_ENV: development
+            PORT: 8000
             DATABASE_URL: postgresql://postgres:abc@postgres:5432/brandon_stock_db
         volumes:
-            - ./server:/server
+            - ./server/package.json:/server/package.json
             - ./server/node_modules:/server/node_modules
         command:
             - /bin/sh
@@ -45,16 +53,10 @@ services:
         develop:
             watch:
                 - action: sync
-                  path: ./src
-                  target: /server/src
-                  ignore:
-                      - node_modules/
-                - action: sync
-                  path: ./
+                  path: ./server
                   target: /server
                   ignore:
                       - node_modules/
-                      - package.json
         depends_on:
             - postgres
 
